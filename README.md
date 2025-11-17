@@ -39,7 +39,7 @@ A comprehensive time tracking and data management dashboard built with Next.js f
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/Unfavdemo/Taheera-Time-data-tracker-.git
 cd Taheera-Time-data-tracker-
 ```
 
