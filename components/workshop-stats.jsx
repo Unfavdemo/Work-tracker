@@ -45,7 +45,7 @@ export function WorkshopStats() {
                   <Clock className="h-4 w-4 text-accent" />
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground">Avg. Time/Workshop</p>
+                  <p className="text-xs font-medium text-muted-foreground">Time per Workshop Creation</p>
                   <p className="text-2xl font-bold text-card-foreground">
                     {workshopStats.avgTime.value}{workshopStats.avgTime.unit}
                   </p>

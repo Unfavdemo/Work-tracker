@@ -4,60 +4,73 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* High contrast color scheme for better readability */
-  --background: oklch(0.08 0 0);
-  --foreground: oklch(0.99 0 0);
-  --card: oklch(0.12 0 0);
-  --card-foreground: oklch(0.99 0 0);
-  --popover: oklch(0.12 0 0);
-  --popover-foreground: oklch(0.99 0 0);
-  --primary: oklch(0.70 0.15 240);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.25 0 0);
-  --secondary-foreground: oklch(0.99 0 0);
-  --muted: oklch(0.20 0 0);
-  --muted-foreground: oklch(0.85 0 0);
-  --accent: oklch(0.70 0.15 260);
-  --accent-foreground: oklch(0.99 0 0);
+  /* Color scheme: Black, Grey, Silver */
+  /* Black - Primary dark background */
+  --background: oklch(0.05 0 0); /* Near black */
+  --foreground: oklch(0.95 0 0); /* Near white for contrast */
+  --card: oklch(0.10 0 0); /* Dark grey-black */
+  --card-foreground: oklch(0.95 0 0);
+  --popover: oklch(0.10 0 0);
+  --popover-foreground: oklch(0.95 0 0);
+  
+  /* Grey - Secondary and muted elements */
+  --primary: oklch(0.50 0 0); /* Medium grey */
+  --primary-foreground: oklch(0.95 0 0);
+  --secondary: oklch(0.20 0 0); /* Dark grey */
+  --secondary-foreground: oklch(0.95 0 0);
+  --muted: oklch(0.25 0 0); /* Medium-dark grey */
+  --muted-foreground: oklch(0.70 0 0); /* Light grey text */
+  
+  /* Silver - Accent and highlights */
+  --accent: oklch(0.65 0 0); /* Silver */
+  --accent-foreground: oklch(0.10 0 0); /* Black text on silver */
   --destructive: oklch(0.60 0.25 27);
   --destructive-foreground: oklch(0.99 0 0);
-  --border: oklch(0.30 0 0);
-  --input: oklch(0.25 0 0);
-  --ring: oklch(0.70 0.15 260);
-  --chart-1: oklch(0.70 0.18 260);
-  --chart-2: oklch(0.65 0.15 200);
-  --chart-3: oklch(0.75 0.12 120);
-  --chart-4: oklch(0.60 0.15 300);
-  --chart-5: oklch(0.80 0.10 40);
+  --border: oklch(0.30 0 0); /* Grey border */
+  --input: oklch(0.20 0 0); /* Dark grey input */
+  --ring: oklch(0.65 0 0); /* Silver ring */
+  
+  /* Chart colors using grey scale with silver accents */
+  --chart-1: oklch(0.65 0 0); /* Silver */
+  --chart-2: oklch(0.50 0 0); /* Medium grey */
+  --chart-3: oklch(0.40 0 0); /* Dark grey */
+  --chart-4: oklch(0.70 0 0); /* Light silver */
+  --chart-5: oklch(0.35 0 0); /* Darker grey */
   --radius: 0.75rem;
 }
 
 .light {
-  /* High contrast light mode for better readability */
-  --background: oklch(0.99 0 0);
-  --foreground: oklch(0.10 0 0);
-  --card: oklch(1 0 0);
+  /* Light mode: Silver, Grey, Black (inverted) */
+  --background: oklch(0.98 0 0); /* Near white */
+  --foreground: oklch(0.10 0 0); /* Near black */
+  --card: oklch(1 0 0); /* White */
   --card-foreground: oklch(0.10 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.10 0 0);
-  --primary: oklch(0.40 0.18 240);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.92 0 0);
+  
+  /* Grey - Primary elements */
+  --primary: oklch(0.40 0 0); /* Medium grey */
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.90 0 0); /* Light grey */
   --secondary-foreground: oklch(0.10 0 0);
-  --muted: oklch(0.90 0 0);
-  --muted-foreground: oklch(0.35 0 0);
-  --accent: oklch(0.45 0.18 260);
-  --accent-foreground: oklch(0.99 0 0);
+  --muted: oklch(0.85 0 0); /* Light grey */
+  --muted-foreground: oklch(0.40 0 0); /* Medium grey text */
+  
+  /* Silver - Accent */
+  --accent: oklch(0.70 0 0); /* Silver */
+  --accent-foreground: oklch(0.10 0 0); /* Black text on silver */
   --destructive: oklch(0.60 0.25 27);
   --destructive-foreground: oklch(0.99 0 0);
-  --border: oklch(0.85 0 0);
-  --input: oklch(0.90 0 0);
-  --ring: oklch(0.45 0.18 260);
-  --chart-1: oklch(0.45 0.20 260);
-  --chart-2: oklch(0.40 0.18 200);
-  --chart-3: oklch(0.50 0.15 120);
-  --chart-4: oklch(0.35 0.18 300);
-  --chart-5: oklch(0.55 0.12 40);
+  --border: oklch(0.80 0 0); /* Light grey border */
+  --input: oklch(0.92 0 0); /* Very light grey input */
+  --ring: oklch(0.70 0 0); /* Silver ring */
+  
+  /* Chart colors using grey scale with silver accents */
+  --chart-1: oklch(0.70 0 0); /* Silver */
+  --chart-2: oklch(0.50 0 0); /* Medium grey */
+  --chart-3: oklch(0.40 0 0); /* Dark grey */
+  --chart-4: oklch(0.60 0 0); /* Light grey */
+  --chart-5: oklch(0.30 0 0); /* Darker grey */
 }
 
 @theme inline {

@@ -3,6 +3,7 @@
 import { WorkshopStats } from '@/components/workshop-stats'
 import { CommunicationStats } from '@/components/communication-stats'
 import { SchedulePanel } from '@/components/schedule-panel'
+import { EmailTracker } from '@/components/email-tracker'
 import { AiRecommendations } from '@/components/ai-recommendations'
 import { ActivityFeed } from '@/components/activity-feed'
 import { PerformanceMetrics } from '@/components/performance-metrics'
@@ -324,6 +325,11 @@ export default function Page() {
           {/* Schedule Panel */}
           <div className="lg:col-span-1 animate-in slide-in-from-right duration-700 delay-100">
             <SchedulePanel searchQuery={searchQuery} />
+          </div>
+
+          {/* Email Tracker - Takes 1 column */}
+          <div className="lg:col-span-1 animate-in slide-in-from-right duration-700 delay-150">
+            <EmailTracker />
           </div>
 
           {/* Performance Metrics - Full width */}
