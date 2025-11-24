@@ -26,8 +26,31 @@ export async function GET(request) {
 
     // Return authorization URL
     if (action === 'url') {
-      const authUrl = getGmailAuthUrl()
-      return NextResponse.json({ authUrl })
+      // Check if environment variables are configured
+      if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+        return NextResponse.json(
+          { 
+            error: 'Gmail OAuth not configured',
+            requiresConfig: true,
+            message: 'Please configure GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.'
+          },
+          { status: 500 }
+        )
+      }
+      
+      try {
+        const authUrl = getGmailAuthUrl()
+        return NextResponse.json({ authUrl })
+      } catch (error) {
+        console.error('Error generating Gmail auth URL:', error)
+        return NextResponse.json(
+          { 
+            error: 'Failed to generate authentication URL',
+            details: error.message
+          },
+          { status: 500 }
+        )
+      }
     }
 
     return NextResponse.json(

@@ -13,29 +13,29 @@
   --popover: oklch(0.10 0 0);
   --popover-foreground: oklch(0.95 0 0);
   
-  /* Grey - Secondary and muted elements */
-  --primary: oklch(0.50 0 0); /* Medium grey */
+  /* Purple - Primary and accent colors */
+  --primary: oklch(0.55 0.20 280); /* Medium purple */
   --primary-foreground: oklch(0.95 0 0);
   --secondary: oklch(0.20 0 0); /* Dark grey */
   --secondary-foreground: oklch(0.95 0 0);
   --muted: oklch(0.25 0 0); /* Medium-dark grey */
   --muted-foreground: oklch(0.70 0 0); /* Light grey text */
   
-  /* Silver - Accent and highlights */
-  --accent: oklch(0.65 0 0); /* Silver */
-  --accent-foreground: oklch(0.10 0 0); /* Black text on silver */
+  /* Purple - Accent and highlights */
+  --accent: oklch(0.65 0.25 285); /* Bright purple */
+  --accent-foreground: oklch(0.95 0 0); /* White text on purple */
   --destructive: oklch(0.60 0.25 27);
   --destructive-foreground: oklch(0.99 0 0);
   --border: oklch(0.30 0 0); /* Grey border */
   --input: oklch(0.20 0 0); /* Dark grey input */
-  --ring: oklch(0.65 0 0); /* Silver ring */
+  --ring: oklch(0.65 0.25 285); /* Purple ring */
   
-  /* Chart colors using grey scale with silver accents */
-  --chart-1: oklch(0.65 0 0); /* Silver */
-  --chart-2: oklch(0.50 0 0); /* Medium grey */
-  --chart-3: oklch(0.40 0 0); /* Dark grey */
-  --chart-4: oklch(0.70 0 0); /* Light silver */
-  --chart-5: oklch(0.35 0 0); /* Darker grey */
+  /* Chart colors using purple palette */
+  --chart-1: oklch(0.65 0.25 285); /* Bright purple */
+  --chart-2: oklch(0.60 0.22 280); /* Medium purple */
+  --chart-3: oklch(0.55 0.20 275); /* Deep purple */
+  --chart-4: oklch(0.70 0.28 290); /* Light purple */
+  --chart-5: oklch(0.50 0.18 270); /* Dark purple */
   --radius: 0.75rem;
 }
 
@@ -48,29 +48,29 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.10 0 0);
   
-  /* Grey - Primary elements */
-  --primary: oklch(0.40 0 0); /* Medium grey */
+  /* Purple - Primary elements */
+  --primary: oklch(0.50 0.22 280); /* Medium purple */
   --primary-foreground: oklch(0.98 0 0);
   --secondary: oklch(0.90 0 0); /* Light grey */
   --secondary-foreground: oklch(0.10 0 0);
   --muted: oklch(0.85 0 0); /* Light grey */
   --muted-foreground: oklch(0.40 0 0); /* Medium grey text */
   
-  /* Silver - Accent */
-  --accent: oklch(0.70 0 0); /* Silver */
-  --accent-foreground: oklch(0.10 0 0); /* Black text on silver */
+  /* Purple - Accent */
+  --accent: oklch(0.65 0.25 285); /* Bright purple */
+  --accent-foreground: oklch(0.98 0 0); /* White text on purple */
   --destructive: oklch(0.60 0.25 27);
   --destructive-foreground: oklch(0.99 0 0);
   --border: oklch(0.80 0 0); /* Light grey border */
   --input: oklch(0.92 0 0); /* Very light grey input */
-  --ring: oklch(0.70 0 0); /* Silver ring */
+  --ring: oklch(0.65 0.25 285); /* Purple ring */
   
-  /* Chart colors using grey scale with silver accents */
-  --chart-1: oklch(0.70 0 0); /* Silver */
-  --chart-2: oklch(0.50 0 0); /* Medium grey */
-  --chart-3: oklch(0.40 0 0); /* Dark grey */
-  --chart-4: oklch(0.60 0 0); /* Light grey */
-  --chart-5: oklch(0.30 0 0); /* Darker grey */
+  /* Chart colors using purple palette */
+  --chart-1: oklch(0.65 0.25 285); /* Bright purple */
+  --chart-2: oklch(0.60 0.22 280); /* Medium purple */
+  --chart-3: oklch(0.55 0.20 275); /* Deep purple */
+  --chart-4: oklch(0.70 0.28 290); /* Light purple */
+  --chart-5: oklch(0.50 0.18 270); /* Dark purple */
 }
 
 @theme inline {
@@ -110,10 +110,17 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+  }
   body {
     @apply bg-background text-foreground antialiased;
     font-weight: 400;
     letter-spacing: 0.01em;
+    overflow-x: hidden;
   }
   
   /* Improved text contrast */
@@ -125,6 +132,34 @@
   
   p, span, div {
     @apply text-foreground;
+  }
+  
+  /* Ensure no black text in dark mode - set base color */
+  .dark {
+    color: var(--foreground);
+  }
+  
+  /* Override any inline black/dark text colors in dark mode */
+  .dark [style*="color: rgb(0"],
+  .dark [style*="color:#000"],
+  .dark [style*="color: black"],
+  .dark [style*="color:Black"],
+  .dark [style*="color:rgb(0,0,0)"],
+  .dark [style*="color:rgb(0, 0, 0)"] {
+    color: var(--foreground) !important;
+  }
+  
+  /* Ensure text elements without explicit color classes use foreground */
+  .dark p:not([class*="text-"]):not([style*="color"]),
+  .dark span:not([class*="text-"]):not([style*="color"]),
+  .dark div:not([class*="text-"]):not([style*="color"]),
+  .dark h1:not([class*="text-"]):not([style*="color"]),
+  .dark h2:not([class*="text-"]):not([style*="color"]),
+  .dark h3:not([class*="text-"]):not([style*="color"]),
+  .dark h4:not([class*="text-"]):not([style*="color"]),
+  .dark h5:not([class*="text-"]):not([style*="color"]),
+  .dark h6:not([class*="text-"]):not([style*="color"]) {
+    color: var(--foreground);
   }
   
   /* Smooth scrolling */
@@ -199,4 +234,21 @@
 
 .slide-in-from-right {
   animation: slide-in-from-right 0.5s ease-out;
+}
+
+/* Make chart axis labels visible - using gray text */
+.recharts-cartesian-axis-tick text,
+.recharts-cartesian-axis-tick-value,
+.recharts-legend-item-text {
+  fill: var(--foreground) !important;
+  color: var(--foreground) !important;
+}
+
+/* Ensure chart text is visible in dark mode - using gray text */
+.dark .recharts-cartesian-axis-tick text,
+.dark .recharts-cartesian-axis-tick-value,
+.dark .recharts-legend-item-text,
+.dark .recharts-tooltip {
+  fill: var(--foreground) !important;
+  color: var(--foreground) !important;
 }

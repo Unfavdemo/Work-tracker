@@ -44,13 +44,13 @@ export function ExportPanel() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-2 sm:grid-cols-2">
+        <div className="grid gap-1.5 sm:grid-cols-2">
           <Button
             variant="outline"
-            className="h-auto flex-col items-start gap-1.5 p-3 hover:bg-accent/10"
+            className="h-auto flex-col items-start gap-1 p-2 hover:bg-accent/10"
             onClick={() => handleExport('Workshop Statistics')}
           >
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <BarChart3 className="h-4 w-4" />
               <span className="font-semibold">Workshop Statistics</span>
             </div>
@@ -58,10 +58,10 @@ export function ExportPanel() {
           </Button>
           <Button
             variant="outline"
-            className="h-auto flex-col items-start gap-1.5 p-3 hover:bg-accent/10"
+            className="h-auto flex-col items-start gap-1 p-2 hover:bg-accent/10"
             onClick={() => handleExport('Communication Data')}
           >
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <FileText className="h-4 w-4" />
               <span className="font-semibold">Communication Data</span>
             </div>
@@ -69,10 +69,10 @@ export function ExportPanel() {
           </Button>
           <Button
             variant="outline"
-            className="h-auto flex-col items-start gap-1.5 p-3 hover:bg-accent/10"
+            className="h-auto flex-col items-start gap-1 p-2 hover:bg-accent/10"
             onClick={() => handleExport('Schedule')}
           >
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <Calendar className="h-4 w-4" />
               <span className="font-semibold">Schedule</span>
             </div>
@@ -80,10 +80,10 @@ export function ExportPanel() {
           </Button>
           <Button
             variant="outline"
-            className="h-auto flex-col items-start gap-1.5 p-3 hover:bg-accent/10"
+            className="h-auto flex-col items-start gap-1 p-2 hover:bg-accent/10"
             onClick={() => handleExport('Full Report')}
           >
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <Download className="h-4 w-4" />
               <span className="font-semibold">Full Report</span>
             </div>

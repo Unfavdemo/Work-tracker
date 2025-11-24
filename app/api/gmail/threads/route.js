@@ -20,12 +20,27 @@ export async function GET(request) {
     return NextResponse.json({ threads })
   } catch (error) {
     console.error('Error fetching student email threads:', error)
+    
+    // Check if it's an authentication error
+    const isAuthError = error.code === 401 || 
+                       error.code === 403 || 
+                       error.message?.includes('invalid authentication') ||
+                       error.message?.includes('authentication credential') ||
+                       error.message?.includes('OAuth 2') ||
+                       error.message?.includes('Invalid or expired authentication token') ||
+                       error.message?.includes('Request had invalid authentication credentials')
+    
+    const statusCode = isAuthError ? (error.code || 401) : 500
+    const errorMessage = isAuthError 
+      ? 'Invalid or expired authentication token'
+      : (error.message || 'Failed to fetch student email threads')
+    
     return NextResponse.json(
       { 
-        error: error.message || 'Failed to fetch student email threads',
+        error: errorMessage,
         details: error.code || 'Unknown error'
       },
-      { status: 500 }
+      { status: statusCode }
     )
   }
 }

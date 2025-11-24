@@ -1,8 +1,9 @@
 import { Geist, Geist_Mono } from 'next/font/google'
-import { Analytics } from '@vercel/analytics/next'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/sonner'
+import { AnalyticsWrapper } from '@/components/analytics-wrapper'
 import './globals.css'
+import { ErrorHandler } from '@/components/error-handler'
 
 const geist = Geist({ 
   subsets: ["latin"],
@@ -21,11 +22,6 @@ export const metadata = {
   generator: 'Next.js',
   keywords: ['workshop', 'tracker', 'dashboard', 'analytics', 'education'],
   authors: [{ name: 'Taheera' }],
-  viewport: 'width=device-width, initial-scale=1',
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#1a1a1a' },
-  ],
   icons: {
     icon: [
       {
@@ -45,10 +41,20 @@ export const metadata = {
   },
 }
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#1a1a1a' },
+  ],
+}
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geist.variable} ${geistMono.variable} font-sans antialiased`}>
+        <ErrorHandler />
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
@@ -57,7 +63,7 @@ export default function RootLayout({ children }) {
         >
           {children}
           <Toaster position="top-right" richColors />
-          <Analytics />
+          <AnalyticsWrapper />
         </ThemeProvider>
       </body>
     </html>

@@ -40,9 +40,10 @@ export async function GET(request) {
               const tokens = ${JSON.stringify(tokens)};
               if (window.opener) {
                 window.opener.postMessage({
-                  type: 'GOOGLE_CALENDAR_AUTH_SUCCESS',
+                  type: 'GOOGLE_AUTH_SUCCESS',
                   accessToken: tokens.access_token,
                   refreshToken: tokens.refresh_token,
+                  services: ['calendar', 'drive', 'docs'],
                 }, window.location.origin);
                 window.close();
               } else {
@@ -83,7 +84,7 @@ export async function GET(request) {
           <script>
             if (window.opener) {
               window.opener.postMessage({
-                type: 'GOOGLE_CALENDAR_AUTH_ERROR',
+                type: 'GOOGLE_AUTH_ERROR',
                 error: ${JSON.stringify(error.message)},
               }, window.location.origin);
               setTimeout(() => window.close(), 2000);

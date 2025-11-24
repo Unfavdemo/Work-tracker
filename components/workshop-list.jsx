@@ -3,14 +3,91 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { recentWorkshops } from '@/lib/data'
-import { FileText, Users, Clock, Star, Download, MoreVertical } from 'lucide-react'
+import { FileText, Users, Clock, Star, Download, MoreVertical, Loader2, RefreshCw, Calendar, Video, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 export function WorkshopList({ searchQuery = '' }) {
+  const router = useRouter()
+  const [workshops, setWorkshops] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSyncing, setIsSyncing] = useState(false)
+  const [sources, setSources] = useState([])
+  
+  useEffect(() => {
+    fetchWorkshops()
+    // Refresh every 30 seconds to get new workshops
+    const interval = setInterval(fetchWorkshops, 30000)
+    
+    // Listen for workshop creation events
+    const handleWorkshopUpdate = () => {
+      fetchWorkshops()
+    }
+    window.addEventListener('workshopUpdated', handleWorkshopUpdate)
+    
+    // Listen for storage events (cross-tab communication)
+    const handleStorageChange = (e) => {
+      if (e.key === 'workshop_created' || e.key === 'workshop_updated') {
+        fetchWorkshops()
+        // Clear the trigger after using it
+        if (e.key === 'workshop_created') {
+          localStorage.removeItem('workshop_created')
+        }
+        if (e.key === 'workshop_updated') {
+          localStorage.removeItem('workshop_updated')
+        }
+      }
+    }
+    window.addEventListener('storage', handleStorageChange)
+    
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener('workshopUpdated', handleWorkshopUpdate)
+      window.removeEventListener('storage', handleStorageChange)
+    }
+  }, [])
+  
+  const fetchWorkshops = async () => {
+    setIsLoading(true)
+    try {
+      // Get Google Calendar token if available
+      const calendarToken = localStorage.getItem('google_token') || localStorage.getItem('google_calendar_token')
+      const headers = calendarToken ? {
+        'Authorization': `Bearer ${calendarToken}`
+      } : {}
+      
+      const response = await fetch('/api/workshops/list?limit=10&sync=true', {
+        headers
+      })
+      if (response.ok) {
+        const result = await response.json()
+        if (result.workshops) {
+          setWorkshops(result.workshops)
+        }
+        if (result.sources) {
+          setSources(result.sources)
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching workshops:', error)
+      // Use fallback data (already set in state)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+  
   // Filter workshops based on search query
-  const filteredWorkshops = recentWorkshops.filter(workshop => {
+  const filteredWorkshops = workshops.filter(workshop => {
     if (!searchQuery.trim()) return true
     const query = searchQuery.toLowerCase()
     return (
@@ -48,10 +125,57 @@ export function WorkshopList({ searchQuery = '' }) {
     })
   }
 
-  const handleMenuClick = () => {
-    toast.info('Workshop List Options', {
-      description: 'Sort, filter, or bulk export workshops',
-    })
+  const handleBulkExport = () => {
+    const exportData = JSON.stringify(filteredWorkshops, null, 2)
+    const blob = new Blob([exportData], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `workshops-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    toast.success(`Exported ${filteredWorkshops.length} workshops!`)
+  }
+  
+  const handleRefresh = () => {
+    fetchWorkshops()
+    toast.success('Workshop list refreshed!')
+  }
+
+  const handleSync = async () => {
+    setIsSyncing(true)
+    try {
+      const calendarToken = localStorage.getItem('google_token') || localStorage.getItem('google_calendar_token')
+      const headers = calendarToken ? {
+        'Authorization': `Bearer ${calendarToken}`
+      } : {}
+      
+      const response = await fetch('/api/workshops/sync', {
+        headers
+      })
+      
+      if (response.ok) {
+        const result = await response.json()
+        toast.success('Workshops synced successfully', {
+          description: `Found ${result.syncResults.google_calendar?.count || 0} from Calendar`,
+        })
+        // Refresh the list
+        fetchWorkshops()
+      } else {
+        toast.error('Sync failed', {
+          description: 'Could not sync workshops from APIs',
+        })
+      }
+    } catch (error) {
+      console.error('Error syncing workshops:', error)
+      toast.error('Sync failed', {
+        description: error.message || 'Could not sync workshops',
+      })
+    } finally {
+      setIsSyncing(false)
+    }
   }
 
   return (
@@ -62,28 +186,75 @@ export function WorkshopList({ searchQuery = '' }) {
             <CardTitle className="text-xl font-bold text-card-foreground">Recent Workshops</CardTitle>
             <CardDescription className="text-muted-foreground mt-1">
               Your workshop history and statistics
+              {sources.length > 0 && (
+                <span className="ml-2 text-xs">
+                  ({sources.includes('google_calendar') && '📅 Calendar '}
+                  {sources.includes('manual') && '✏️ Manual'})
+                </span>
+              )}
             </CardDescription>
           </div>
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleMenuClick}>
-            <MoreVertical className="h-4 w-4" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8" 
+              onClick={handleSync}
+              disabled={isSyncing}
+              title="Sync from APIs"
+            >
+              <RefreshCw className={cn("h-4 w-4", isSyncing && "animate-spin")} />
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Options</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleRefresh}>
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Refresh List
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleBulkExport}>
+                  <Download className="mr-2 h-4 w-4" />
+                  Export All ({filteredWorkshops.length})
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => toast.info('Sort options coming soon')}>
+                  <FileText className="mr-2 h-4 w-4" />
+                  Sort Options
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push('/settings')}>
+                  <Settings className="mr-2 h-4 w-4" />
+                  Settings
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
-        {filteredWorkshops.length === 0 ? (
+        {isLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-accent" />
+          </div>
+        ) : filteredWorkshops.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <p className="text-sm font-medium text-muted-foreground">No workshops found</p>
             <p className="text-xs text-muted-foreground mt-1">Try a different search term</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {filteredWorkshops.map((workshop) => (
             <div
               key={workshop.id}
-              className="group rounded-lg border border-border/50 bg-gradient-to-br from-secondary/40 to-secondary/20 p-3 transition-all duration-300 hover:border-accent/50 hover:bg-secondary/60 hover:shadow-lg"
+              className="group rounded-lg border border-border/50 bg-gradient-to-br from-secondary/40 to-secondary/20 p-2 transition-all duration-300 hover:border-accent/50 hover:bg-secondary/60 hover:shadow-lg"
             >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 space-y-1.5">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 space-y-1">
                   <div className="flex items-center gap-1.5">
                     <FileText className="h-3.5 w-3.5 text-accent" />
                     <h3 className="text-sm font-semibold text-card-foreground">{workshop.title}</h3>
@@ -93,6 +264,9 @@ export function WorkshopList({ searchQuery = '' }) {
                     >
                       {workshop.status}
                     </Badge>
+                    {workshop.source === 'google_calendar' && (
+                      <Calendar className="h-3 w-3 text-blue-500" title="From Google Calendar" />
+                    )}
                   </div>
                   <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">

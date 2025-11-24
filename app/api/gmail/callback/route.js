@@ -8,15 +8,75 @@ export async function GET(request) {
     const error = searchParams.get('error')
 
     if (error) {
-      return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}?gmail_auth_error=${encodeURIComponent(error)}`
-      )
+      // Return HTML page that sends error message to parent window
+      const errorHtml = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Gmail Authentication Error</title>
+          </head>
+          <body>
+            <div style="display: flex; align-items: center; justify-content: center; height: 100vh; font-family: system-ui;">
+              <div style="text-align: center;">
+                <p style="color: #ef4444; font-size: 14px;">Gmail authentication was cancelled or denied.</p>
+              </div>
+            </div>
+            <script>
+              if (window.opener) {
+                window.opener.postMessage({
+                  type: 'GMAIL_AUTH_ERROR',
+                  error: ${JSON.stringify(error)},
+                }, window.location.origin);
+                setTimeout(() => window.close(), 2000);
+              } else {
+                window.location.href = '${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}?gmail_auth_error=' + encodeURIComponent(${JSON.stringify(error)});
+              }
+            </script>
+          </body>
+        </html>
+      `
+      return new NextResponse(errorHtml, {
+        headers: {
+          'Content-Type': 'text/html',
+        },
+        status: 400,
+      })
     }
 
     if (!code) {
-      return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}?gmail_auth_error=no_code`
-      )
+      // Return HTML page that sends error message to parent window
+      const errorHtml = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Gmail Authentication Error</title>
+          </head>
+          <body>
+            <div style="display: flex; align-items: center; justify-content: center; height: 100vh; font-family: system-ui;">
+              <div style="text-align: center;">
+                <p style="color: #ef4444; font-size: 14px;">No authorization code received.</p>
+              </div>
+            </div>
+            <script>
+              if (window.opener) {
+                window.opener.postMessage({
+                  type: 'GMAIL_AUTH_ERROR',
+                  error: 'No authorization code received',
+                }, window.location.origin);
+                setTimeout(() => window.close(), 2000);
+              } else {
+                window.location.href = '${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}?gmail_auth_error=no_code';
+              }
+            </script>
+          </body>
+        </html>
+      `
+      return new NextResponse(errorHtml, {
+        headers: {
+          'Content-Type': 'text/html',
+        },
+        status: 400,
+      })
     }
 
     const tokens = await getGmailTokensFromCode(code)
@@ -38,16 +98,42 @@ export async function GET(request) {
           <script>
             (function() {
               const tokens = ${JSON.stringify(tokens)};
-              if (window.opener) {
-                window.opener.postMessage({
-                  type: 'GMAIL_AUTH_SUCCESS',
-                  accessToken: tokens.access_token,
-                  refreshToken: tokens.refresh_token,
-                }, window.location.origin);
-                window.close();
-              } else {
-                // Fallback: redirect with tokens in URL (less secure, but works)
-                window.location.href = '${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}?gmail_auth_success=true&token=' + encodeURIComponent(tokens.access_token);
+              const origin = window.location.origin;
+              
+              // Try to send message immediately
+              function sendMessage() {
+                if (window.opener && !window.opener.closed) {
+                  try {
+                    window.opener.postMessage({
+                      type: 'GMAIL_AUTH_SUCCESS',
+                      accessToken: tokens.access_token,
+                      refreshToken: tokens.refresh_token,
+                    }, origin);
+                    // Give message time to be received before closing
+                    setTimeout(() => {
+                      try {
+                        window.close();
+                      } catch (e) {
+                        // Popup might already be closed
+                      }
+                    }, 100);
+                  } catch (e) {
+                    console.error('Error sending postMessage:', e);
+                    // Fallback: redirect with tokens in URL
+                    window.location.href = '${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}?gmail_auth_success=true&token=' + encodeURIComponent(tokens.access_token);
+                  }
+                } else {
+                  // Fallback: redirect with tokens in URL (less secure, but works)
+                  window.location.href = '${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}?gmail_auth_success=true&token=' + encodeURIComponent(tokens.access_token);
+                }
+              }
+              
+              // Send immediately when script loads
+              sendMessage();
+              
+              // Also try on page load in case opener wasn't ready
+              if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', sendMessage);
               }
             })();
           </script>

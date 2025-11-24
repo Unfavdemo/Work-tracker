@@ -29,12 +29,13 @@ export function DateRangePicker({ onRangeChange }) {
     <div className="relative">
       <Button
         variant="outline"
+        size="lg"
         onClick={() => setIsOpen(!isOpen)}
-        className="gap-2"
+        className="gap-2 h-12 px-6"
       >
-        <Calendar className="h-4 w-4" />
+        <Calendar className="h-5 w-5" />
         <span>{dateRanges.find(r => r.value === selectedRange)?.label}</span>
-        <ChevronDown className="h-4 w-4" />
+        <ChevronDown className="h-5 w-5" />
       </Button>
       {isOpen && (
         <>
@@ -42,13 +43,13 @@ export function DateRangePicker({ onRangeChange }) {
             className="fixed inset-0 z-10"
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute top-full mt-2 z-20 rounded-lg border border-border bg-card shadow-lg p-1 min-w-[160px]">
+          <div className="absolute top-full mt-2 z-20 rounded-lg border border-border bg-card shadow-lg p-2 min-w-[200px]">
             {dateRanges.map((range) => (
               <button
                 key={range.value}
                 onClick={() => handleSelect(range.value)}
                 className={cn(
-                  "w-full text-left px-3 py-2 rounded-md text-sm transition-colors",
+                  "w-full text-left px-4 py-3 rounded-md text-base transition-colors",
                   "hover:bg-accent hover:text-accent-foreground",
                   selectedRange === range.value && "bg-accent text-accent-foreground font-medium"
                 )}

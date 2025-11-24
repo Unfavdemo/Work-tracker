@@ -23,6 +23,8 @@ export async function GET(request) {
     const maxResults = parseInt(searchParams.get('maxResults') || '50')
     const calendarId = searchParams.get('calendarId') || 'primary'
 
+    console.log('Fetching calendar events with token:', accessToken ? 'Token present' : 'No token')
+    
     const events = await fetchCalendarEvents(accessToken, {
       timeMin,
       timeMax,
@@ -99,13 +101,43 @@ export async function GET(request) {
       message: error.message,
       code: error.code,
       response: error.response?.data,
+      originalError: error.originalError,
     })
+    
+    // Check if it's an authentication error
+    const isAuthError = error.code === 401 || 
+                       error.code === 403 || 
+                       error.message?.includes('invalid authentication') ||
+                       error.message?.includes('authentication credential') ||
+                       error.message?.includes('Invalid or expired authentication token')
+    
+    // Check if it's a network error
+    const isNetworkError = error.code === 'ENOTFOUND' || 
+                          error.code === 'ECONNREFUSED' || 
+                          error.code === 'ETIMEDOUT' ||
+                          error.code === 'NETWORK_ERROR' ||
+                          error.message?.includes('getaddrinfo') ||
+                          error.message?.includes('ENOTFOUND') ||
+                          error.message?.includes('Network error')
+    
+    let statusCode = 500
+    let errorMessage = error.message || 'Failed to fetch calendar events'
+    
+    if (isAuthError) {
+      statusCode = error.code || 401
+      errorMessage = 'Invalid or expired authentication token'
+    } else if (isNetworkError) {
+      statusCode = 503 // Service Unavailable
+      errorMessage = error.message || 'Network error: Unable to connect to Google Calendar API'
+    }
+    
     return NextResponse.json(
       { 
-        error: error.message || 'Failed to fetch calendar events',
-        details: error.code || 'Unknown error'
+        error: errorMessage,
+        details: error.code || 'Unknown error',
+        type: isAuthError ? 'authentication' : isNetworkError ? 'network' : 'unknown'
       },
-      { status: 500 }
+      { status: statusCode }
     )
   }
 }
