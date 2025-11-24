@@ -24,13 +24,15 @@ import {
   Save,
   CheckCircle2,
   XCircle,
-  Sparkles
+  Sparkles,
+  FileText
 } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
+import { FormEditor } from '@/components/form-editor'
 
 export default function SettingsPage() {
   const router = useRouter()
@@ -903,6 +905,27 @@ export default function SettingsPage() {
                 onCheckedChange={(checked) => updateSetting('includeMetadata', checked)}
               />
             </div>
+          </CardContent>
+        </Card>
+        
+        {/* Form Editor */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-accent" />
+              Form Editor
+            </CardTitle>
+            <CardDescription>
+              Edit student check-in and calendar event forms. Switch between forms using the tabs below.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <FormEditor 
+              defaultFormId="101-checkin"
+              onSave={() => {
+                toast.success('Form configuration updated!')
+              }}
+            />
           </CardContent>
         </Card>
         

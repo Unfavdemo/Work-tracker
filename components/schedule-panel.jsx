@@ -57,6 +57,24 @@ export function SchedulePanel({ searchQuery = '' }) {
       localStorage.setItem('google_token', tokenFromUrl)
       // Also migrate old tokens for backward compatibility
       localStorage.setItem('google_calendar_token', tokenFromUrl)
+      
+      // Store token server-side for student calendar submissions
+      const storeToken = async () => {
+        try {
+          await fetch('/api/calendar/store-token', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ token: tokenFromUrl }),
+          })
+        } catch (error) {
+          console.warn('Failed to store token server-side:', error)
+          // Continue anyway - token is still in localStorage
+        }
+      }
+      storeToken()
+      
       setIsAuthenticated(true)
       fetchCalendarEvents(tokenFromUrl)
       // Clean up URL
@@ -220,6 +238,24 @@ export function SchedulePanel({ searchQuery = '' }) {
           // Also store for backward compatibility
           localStorage.setItem('google_calendar_token', accessToken)
           localStorage.setItem('gmail_token', accessToken)
+          
+          // Store token server-side for student calendar submissions
+          const storeToken = async () => {
+            try {
+              await fetch('/api/calendar/store-token', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ token: accessToken }),
+              })
+            } catch (error) {
+              console.warn('Failed to store token server-side:', error)
+              // Continue anyway - token is still in localStorage
+            }
+          }
+          storeToken()
+          
           setIsAuthenticated(true)
           fetchCalendarEvents(accessToken)
           try {

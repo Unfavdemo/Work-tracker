@@ -14,6 +14,8 @@ import { ThemeToggle } from '@/components/theme-toggle'
 import { TimeTracker } from '@/components/time-tracker'
 import { WorkshopCreator } from '@/components/workshop-creator'
 import { AIUsageTracker } from '@/components/ai-usage-tracker'
+import { StudentFeedbackManager } from '@/components/student-feedback-manager'
+import { StudentCalendarManager } from '@/components/student-calendar-manager'
 import { Sparkles, TrendingUp, Activity, Search, Filter, FileText, Calendar, Clock, Download, Settings } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -542,6 +544,13 @@ export default function Page() {
             </div>
           </div>
 
+          {/* Case Notes - Under Workshop Creator */}
+          <div className="lg:col-span-2 animate-in slide-in-from-left duration-500 delay-75 w-full h-full flex">
+            <div className="w-full h-full">
+              <CaseNotes />
+            </div>
+          </div>
+
           {/* Communication Stats - Takes 2 columns */}
           <div className="lg:col-span-2 space-y-6 animate-in slide-in-from-left duration-700 delay-100 w-full h-full flex flex-col">
             <div className="flex-1 w-full">
@@ -574,10 +583,17 @@ export default function Page() {
             </div>
           </div>
 
-          {/* Case Notes - Takes 1 column */}
-          <div className="lg:col-span-1 animate-in slide-in-from-right duration-700 delay-250 w-full h-full flex">
+          {/* Student Feedback Manager - Takes 2 columns */}
+          <div className="lg:col-span-2 animate-in slide-in-from-left duration-700 delay-300 w-full h-full flex">
             <div className="w-full h-full">
-              <CaseNotes />
+              <StudentFeedbackManager />
+            </div>
+          </div>
+
+          {/* Student Calendar Manager - Takes 1 column */}
+          <div className="lg:col-span-1 animate-in slide-in-from-right duration-700 delay-300 w-full h-full flex">
+            <div className="w-full h-full">
+              <StudentCalendarManager />
             </div>
           </div>
 
