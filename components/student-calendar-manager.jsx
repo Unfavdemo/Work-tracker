@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Calendar, User, Clock, Loader2, Trash2, RefreshCw, Eye, CheckCircle2, Filter } from 'lucide-react'
+import { Calendar, User, Clock, Loader2, Trash2, RefreshCw, Eye, CheckCircle2, Filter, XCircle } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -20,6 +20,7 @@ export function StudentCalendarManager() {
   const [events, setEvents] = useState([])
   const [selectedEvent, setSelectedEvent] = useState(null)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
+  const [processingRequest, setProcessingRequest] = useState(null)
 
   useEffect(() => {
     fetchEvents()
@@ -50,6 +51,83 @@ export function StudentCalendarManager() {
     }
   }
 
+
+  const handleApprove = async (event) => {
+    setProcessingRequest(event.id)
+    try {
+      const token = localStorage.getItem('google_token') || localStorage.getItem('google_calendar_token')
+      if (!token) {
+        toast.error('Not authenticated', {
+          description: 'Please connect your Google Calendar first',
+        })
+        return
+      }
+
+      const response = await fetch('/api/student-calendar', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: event.id,
+          status: 'approved',
+          accessToken: token,
+        }),
+      })
+
+      if (response.ok) {
+        toast.success('Event approved', {
+          description: 'The event has been added to your calendar',
+        })
+        fetchEvents()
+        window.dispatchEvent(new Event('calendarEventUpdated'))
+      } else {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to approve event')
+      }
+    } catch (error) {
+      console.error('Error approving event:', error)
+      toast.error('Failed to approve event', {
+        description: error.message || 'Please try again',
+      })
+    } finally {
+      setProcessingRequest(null)
+    }
+  }
+
+  const handleDisapprove = async (event) => {
+    setProcessingRequest(event.id)
+    try {
+      const response = await fetch('/api/student-calendar', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: event.id,
+          status: 'disapproved',
+        }),
+      })
+
+      if (response.ok) {
+        toast.success('Event request rejected', {
+          description: 'The event request has been declined',
+        })
+        fetchEvents()
+        window.dispatchEvent(new Event('calendarEventUpdated'))
+      } else {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to reject event')
+      }
+    } catch (error) {
+      console.error('Error disapproving event:', error)
+      toast.error('Failed to reject event', {
+        description: error.message || 'Please try again',
+      })
+    } finally {
+      setProcessingRequest(null)
+    }
+  }
 
   const handleDelete = async (id) => {
     if (!confirm('Are you sure you want to delete this event request?')) {
@@ -178,6 +256,39 @@ export function StudentCalendarManager() {
                       )}
                     </div>
                     <div className="flex items-center gap-1 flex-shrink-0">
+                      {event.status === 'pending' && (
+                        <>
+                          <Button
+                            size="sm"
+                            className="h-7 text-xs bg-green-600 hover:bg-green-700 text-white"
+                            onClick={() => handleApprove(event)}
+                            disabled={processingRequest === event.id}
+                            title="Approve and add to calendar"
+                          >
+                            {processingRequest === event.id ? (
+                              <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                            ) : (
+                              <CheckCircle2 className="h-3 w-3 mr-1" />
+                            )}
+                            Approve
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-xs border-red-500/50 text-red-600 dark:text-red-400 hover:bg-red-500/10"
+                            onClick={() => handleDisapprove(event)}
+                            disabled={processingRequest === event.id}
+                            title="Reject request"
+                          >
+                            {processingRequest === event.id ? (
+                              <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                            ) : (
+                              <XCircle className="h-3 w-3 mr-1" />
+                            )}
+                            Decline
+                          </Button>
+                        </>
+                      )}
                       <Button
                         variant="ghost"
                         size="icon"

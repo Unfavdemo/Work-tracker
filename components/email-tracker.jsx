@@ -325,6 +325,22 @@ export function EmailTracker() {
         } else if (event.data.type === 'GOOGLE_AUTH_ERROR' || event.data.type === 'GMAIL_AUTH_ERROR') {
           messageReceived = true
           console.error('Google auth error:', event.data.error)
+          
+          // Determine error message based on error type
+          let errorTitle = 'Google authentication failed'
+          let errorDescription = event.data.error || 'Please try again'
+          
+          if (event.data.code === 'NETWORK_ERROR' || event.data.error?.includes('ENOTFOUND') || event.data.error?.includes('Network connection')) {
+            errorTitle = 'Network Connection Error'
+            errorDescription = event.data.details || 'Unable to connect to Google OAuth servers. Please check your internet connection and try again.'
+          } else if (event.data.code === 'OAUTH_ERROR') {
+            errorTitle = 'OAuth Configuration Error'
+            errorDescription = event.data.details || event.data.error
+          } else if (event.data.error?.includes('not configured')) {
+            errorTitle = 'OAuth Not Configured'
+            errorDescription = 'Please configure Google OAuth credentials in your environment variables.'
+          }
+          
           try {
             popup?.close()
           } catch (error) {
@@ -333,8 +349,9 @@ export function EmailTracker() {
           if (timeout) clearTimeout(timeout)
           setIsConnecting(false)
           window.removeEventListener('message', messageHandler)
-          toast.error('Google authentication failed', {
-            description: event.data.error || 'Please try again',
+          toast.error(errorTitle, {
+            description: errorDescription,
+            duration: 8000,
           })
         }
       }

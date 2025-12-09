@@ -48,7 +48,18 @@ export function StudentFeedbackManager() {
       if (response.ok) {
         const result = await response.json()
         if (result.feedbacks) {
-          setFeedbacks(result.feedbacks)
+          // Explicitly filter out any calendar requests - they should only appear in Student Calendar Requests
+          const filteredFeedbacks = result.feedbacks.filter(feedback => {
+            // Exclude calendar-related items
+            const isCalendarRequest = 
+              feedback.category === 'calendar' ||
+              feedback.category === 'scheduling' ||
+              feedback.message?.toLowerCase().includes('calendar request') ||
+              feedback.message?.toLowerCase().includes('calendar event') ||
+              feedback.id?.startsWith('student-event-')
+            return !isCalendarRequest
+          })
+          setFeedbacks(filteredFeedbacks)
         }
       }
     } catch (error) {
@@ -127,7 +138,7 @@ export function StudentFeedbackManager() {
               Student Feedback & Check-ins
             </CardTitle>
             <CardDescription className="text-muted-foreground">
-              View and manage student feedback and check-in submissions
+              View and manage student feedback and check-in submissions. Calendar requests are managed separately in the Student Calendar Requests section.
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">

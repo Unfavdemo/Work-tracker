@@ -9,6 +9,18 @@ export async function GET(request) {
     
     let feedbacks = getFeedbacks()
     
+    // Explicitly exclude calendar requests - they belong in /api/student-calendar only
+    // Calendar requests should never appear in feedback/check-ins
+    feedbacks = feedbacks.filter(feedback => {
+      // Exclude any items that look like calendar requests
+      const isCalendarRequest = 
+        feedback.category === 'calendar' ||
+        feedback.category === 'scheduling' ||
+        feedback.message?.toLowerCase().includes('calendar request') ||
+        feedback.message?.toLowerCase().includes('calendar event')
+      return !isCalendarRequest
+    })
+    
     // Filter by student name if provided
     if (studentName) {
       feedbacks = feedbacks.filter(feedback => 

@@ -99,51 +99,8 @@ export async function POST(request) {
       description: description?.trim() || '',
       location: location?.trim() || '',
       timeZone: timeZone || 'America/New_York',
-      status: 'added', // Events are automatically added to calendar
+      status: 'pending', // Events require approval before being added to calendar
       createdAt: new Date().toISOString(),
-    }
-
-    // Try to automatically add to Google Calendar
-    // Try environment variable first, then stored token
-    let calendarEventId = null
-    let tokenToUse = process.env.GOOGLE_CALENDAR_TOKEN || null
-    
-    // If no token provided, try to get from a simple server-side storage
-    // In production, you'd want to use a proper database or secure storage
-    if (!tokenToUse) {
-      // Try to get from a global variable (in-memory storage for development)
-      // In production, use a database or secure key-value store
-      if (global.googleCalendarToken) {
-        tokenToUse = global.googleCalendarToken
-      }
-    }
-    
-    if (tokenToUse) {
-      try {
-        const calendarEvent = await createCalendarEvent(
-          tokenToUse,
-          {
-            title: newEvent.title,
-            start: newEvent.start,
-            end: newEvent.end,
-            description: `Requested by student: ${newEvent.studentName}\n\n${newEvent.description}`,
-            location: newEvent.location,
-            timeZone: newEvent.timeZone,
-          },
-          'primary'
-        )
-        calendarEventId = calendarEvent.id
-        newEvent.calendarEventId = calendarEventId
-        newEvent.status = 'added'
-      } catch (calendarError) {
-        console.error('Error adding event to calendar:', calendarError)
-        // Continue anyway - event is still stored
-        newEvent.status = 'failed'
-        newEvent.calendarError = calendarError.message
-      }
-    } else {
-      newEvent.status = 'pending'
-      newEvent.calendarError = 'Google Calendar token not available'
     }
 
     addStudentEvent(newEvent)
@@ -152,11 +109,7 @@ export async function POST(request) {
     return NextResponse.json({
       event: newEvent,
       stats,
-      message: calendarEventId 
-        ? 'Calendar event added successfully' 
-        : accessToken 
-          ? 'Event stored but failed to add to calendar' 
-          : 'Event stored (Google Calendar not connected)',
+      message: 'Calendar event request submitted. Waiting for approval.',
     }, { status: 201 })
   } catch (error) {
     console.error('Error creating student calendar event:', error)
@@ -211,7 +164,10 @@ export async function PATCH(request) {
           'primary'
         )
         
-        updateStudentEventStatus(id, 'approved')
+        const updatedEvent = updateStudentEventStatus(id, 'approved')
+        if (updatedEvent) {
+          updatedEvent.calendarEventId = calendarEvent.id
+        }
         const stats = getStudentEventStats()
         
         return NextResponse.json({
@@ -222,12 +178,26 @@ export async function PATCH(request) {
       } catch (calendarError) {
         console.error('Error adding event to calendar:', calendarError)
         // Still update status but note the error
-        updateStudentEventStatus(id, 'approved')
+        const updatedEvent = updateStudentEventStatus(id, 'approved')
+        if (updatedEvent) {
+          updatedEvent.calendarError = calendarError.message
+        }
         return NextResponse.json({
-          event: { ...event, status: 'approved' },
+          event: { ...event, status: 'approved', calendarError: calendarError.message },
           warning: 'Event approved but failed to add to calendar. Please add manually.',
         })
       }
+    }
+    
+    // If disapproving, just update status
+    if (status === 'disapproved' || status === 'rejected') {
+      updateStudentEventStatus(id, 'disapproved')
+      const stats = getStudentEventStats()
+      return NextResponse.json({
+        event: { ...event, status: 'disapproved' },
+        stats,
+        message: 'Event request rejected',
+      })
     }
 
     updateStudentEventStatus(id, status)

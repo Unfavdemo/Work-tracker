@@ -155,25 +155,89 @@ export async function GET(request) {
     })
   } catch (error) {
     console.error('Google auth callback error:', error)
+    
+    // Determine error message based on error type
+    let errorMessage = error.message || 'Google authentication failed. Please try again.'
+    let errorDetails = ''
+    
+    if (error.code === 'NETWORK_ERROR' || error.message?.includes('ENOTFOUND') || error.message?.includes('getaddrinfo')) {
+      errorMessage = 'Network connection error'
+      errorDetails = 'Unable to connect to Google OAuth servers. Please check your internet connection and network settings.'
+    } else if (error.code === 'OAUTH_ERROR') {
+      errorMessage = 'OAuth authentication error'
+      errorDetails = error.message
+    } else if (error.message?.includes('not configured')) {
+      errorMessage = 'OAuth not configured'
+      errorDetails = 'Please configure Google OAuth credentials in your environment variables.'
+    }
+    
     const errorHtml = `
       <!DOCTYPE html>
       <html>
         <head>
           <title>Google Authentication Failed</title>
+          <style>
+            body {
+              font-family: system-ui, -apple-system, sans-serif;
+              margin: 0;
+              padding: 0;
+              background: #f9fafb;
+            }
+            .container {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              min-height: 100vh;
+              padding: 20px;
+            }
+            .error-box {
+              background: white;
+              border-radius: 8px;
+              padding: 24px;
+              max-width: 500px;
+              box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            }
+            .error-title {
+              color: #ef4444;
+              font-size: 18px;
+              font-weight: 600;
+              margin-bottom: 8px;
+            }
+            .error-details {
+              color: #6b7280;
+              font-size: 14px;
+              line-height: 1.5;
+              margin-top: 12px;
+            }
+            .error-code {
+              background: #f3f4f6;
+              padding: 8px 12px;
+              border-radius: 4px;
+              font-family: monospace;
+              font-size: 12px;
+              color: #374151;
+              margin-top: 12px;
+              word-break: break-all;
+            }
+          </style>
         </head>
         <body>
-          <div style="display: flex; align-items: center; justify-content: center; height: 100vh; font-family: system-ui;">
-            <div style="text-align: center;">
-              <p style="color: #ef4444; font-size: 14px;">Google authentication failed. Please try again.</p>
+          <div class="container">
+            <div class="error-box">
+              <div class="error-title">${errorMessage}</div>
+              ${errorDetails ? `<div class="error-details">${errorDetails}</div>` : ''}
+              ${error.code ? `<div class="error-code">Error Code: ${error.code}</div>` : ''}
             </div>
           </div>
           <script>
             if (window.opener) {
               window.opener.postMessage({
                 type: 'GOOGLE_AUTH_ERROR',
-                error: ${JSON.stringify(error.message)},
+                error: ${JSON.stringify(errorMessage)},
+                details: ${JSON.stringify(errorDetails)},
+                code: ${JSON.stringify(error.code || '')},
               }, window.location.origin);
-              setTimeout(() => window.close(), 2000);
+              setTimeout(() => window.close(), 5000);
             }
           </script>
         </body>

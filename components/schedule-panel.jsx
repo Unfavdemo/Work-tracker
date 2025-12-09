@@ -1,7 +1,7 @@
 'use client'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Calendar, Clock, Plus, MoreVertical, Loader2, LogIn, RefreshCw, Download, Settings } from 'lucide-react'
+import { Calendar, Clock, Plus, MoreVertical, Loader2, LogIn, RefreshCw, Download, Settings, CheckCircle2, XCircle, User } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -31,11 +31,14 @@ import {
 export function SchedulePanel({ searchQuery = '' }) {
   const router = useRouter()
   const [events, setEvents] = useState([])
+  const [pendingRequests, setPendingRequests] = useState([])
   const [isLoading, setIsLoading] = useState(false)
+  const [isLoadingPending, setIsLoadingPending] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isConnecting, setIsConnecting] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
+  const [processingRequest, setProcessingRequest] = useState(null)
   const [eventForm, setEventForm] = useState({
     title: '',
     description: '',
@@ -96,6 +99,9 @@ export function SchedulePanel({ searchQuery = '' }) {
       setIsAuthenticated(true)
       fetchCalendarEvents(token)
     }
+    
+    // Fetch pending calendar requests
+    fetchPendingRequests()
   }, [])
 
   // Fetch events from Google Calendar
@@ -310,12 +316,115 @@ export function SchedulePanel({ searchQuery = '' }) {
     }
   }
 
+  // Fetch pending calendar requests
+  const fetchPendingRequests = async () => {
+    setIsLoadingPending(true)
+    try {
+      const response = await fetch('/api/student-calendar?status=pending')
+      if (response.ok) {
+        const data = await response.json()
+        setPendingRequests(data.events || [])
+      }
+    } catch (error) {
+      console.error('Error fetching pending requests:', error)
+    } finally {
+      setIsLoadingPending(false)
+    }
+  }
+
+  // Handle approve/disapprove
+  const handleApproveRequest = async (requestId) => {
+    setProcessingRequest(requestId)
+    try {
+      const token = localStorage.getItem('google_token') || localStorage.getItem('google_calendar_token')
+      if (!token) {
+        toast.error('Not authenticated', {
+          description: 'Please connect your Google Calendar first',
+        })
+        return
+      }
+
+      const response = await fetch('/api/student-calendar', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: requestId,
+          status: 'approved',
+          accessToken: token,
+        }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        toast.success('Event approved', {
+          description: 'The event has been added to your calendar',
+        })
+        // Refresh both lists
+        fetchPendingRequests()
+        if (isAuthenticated) {
+          fetchCalendarEvents(token)
+        }
+        // Trigger refresh for student calendar manager
+        window.dispatchEvent(new Event('calendarEventUpdated'))
+      } else {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to approve event')
+      }
+    } catch (error) {
+      console.error('Error approving request:', error)
+      toast.error('Failed to approve event', {
+        description: error.message || 'Please try again',
+      })
+    } finally {
+      setProcessingRequest(null)
+    }
+  }
+
+  const handleDisapproveRequest = async (requestId) => {
+    setProcessingRequest(requestId)
+    try {
+      const response = await fetch('/api/student-calendar', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: requestId,
+          status: 'disapproved',
+        }),
+      })
+
+      if (response.ok) {
+        toast.success('Event request rejected', {
+          description: 'The event request has been declined',
+        })
+        // Refresh pending requests
+        fetchPendingRequests()
+        // Trigger refresh for student calendar manager
+        window.dispatchEvent(new Event('calendarEventUpdated'))
+      } else {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to reject event')
+      }
+    } catch (error) {
+      console.error('Error disapproving request:', error)
+      toast.error('Failed to reject event', {
+        description: error.message || 'Please try again',
+      })
+    } finally {
+      setProcessingRequest(null)
+    }
+  }
+
   // Handle refresh
   const handleRefresh = () => {
     const token = localStorage.getItem('google_token') || localStorage.getItem('google_calendar_token')
     if (token) {
       fetchCalendarEvents(token)
     }
+    fetchPendingRequests()
   }
 
   // Filter events based on search query
@@ -503,6 +612,104 @@ export function SchedulePanel({ searchQuery = '' }) {
         </div>
       </CardHeader>
       <CardContent className="space-y-1.5">
+        {/* Pending Calendar Requests */}
+        {pendingRequests.length > 0 && (
+          <div className="mb-4 pb-4 border-b border-border/50">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                Pending Requests ({pendingRequests.length})
+              </p>
+            </div>
+            <div className="space-y-2">
+              {pendingRequests.map((request) => {
+                const startDate = new Date(request.start)
+                const endDate = new Date(request.end)
+                const isProcessing = processingRequest === request.id
+                
+                return (
+                  <div
+                    key={request.id}
+                    className="group relative overflow-hidden rounded-lg border-2 border-yellow-500/30 bg-gradient-to-br from-yellow-500/10 to-yellow-500/5 p-3 transition-all duration-300 hover:border-yellow-500/50 hover:shadow-lg"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="rounded-lg bg-yellow-500/20 p-2 flex-shrink-0">
+                        <User className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+                      </div>
+                      <div className="flex-1 space-y-2 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-card-foreground truncate">
+                              {request.title}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              Requested by: <span className="font-medium">{request.studentName}</span>
+                            </p>
+                          </div>
+                          <Badge variant="outline" className="text-xs bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/30 shrink-0">
+                            Pending
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            <span>{startDate.toLocaleDateString()}</span>
+                          </div>
+                          <span>•</span>
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            <span>
+                              {startDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })} - {endDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                            </span>
+                          </div>
+                        </div>
+                        {request.location && (
+                          <p className="text-xs text-muted-foreground truncate">
+                            📍 {request.location}
+                          </p>
+                        )}
+                        {request.description && (
+                          <p className="text-xs text-muted-foreground line-clamp-2">
+                            {request.description}
+                          </p>
+                        )}
+                        <div className="flex items-center gap-2 pt-1">
+                          <Button
+                            size="sm"
+                            className="h-7 text-xs bg-green-600 hover:bg-green-700 text-white"
+                            onClick={() => handleApproveRequest(request.id)}
+                            disabled={isProcessing}
+                          >
+                            {isProcessing ? (
+                              <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                            ) : (
+                              <CheckCircle2 className="h-3 w-3 mr-1" />
+                            )}
+                            Approve
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-xs border-red-500/50 text-red-600 dark:text-red-400 hover:bg-red-500/10"
+                            onClick={() => handleDisapproveRequest(request.id)}
+                            disabled={isProcessing}
+                          >
+                            {isProcessing ? (
+                              <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                            ) : (
+                              <XCircle className="h-3 w-3 mr-1" />
+                            )}
+                            Decline
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+        
         {!isAuthenticated ? (
           <div className="flex flex-col items-center justify-center py-4 text-center space-y-2">
             <div className="rounded-full bg-accent/10 p-4">
