@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/sonner'
 import { AnalyticsWrapper } from '@/components/analytics-wrapper'
+import { Footer } from '@/components/footer'
 import './globals.css'
 import { ErrorHandler } from '@/components/error-handler'
 
@@ -25,12 +26,14 @@ export const metadata = {
   icons: {
     icon: [
       {
-        url: '/icon-light-32x32.png',
+        url: '/icon-light-32x32.svg',
         media: '(prefers-color-scheme: light)',
+        type: 'image/svg+xml',
       },
       {
-        url: '/icon-dark-32x32.png',
+        url: '/icon-dark-32x32.svg',
         media: '(prefers-color-scheme: dark)',
+        type: 'image/svg+xml',
       },
       {
         url: '/icon.svg',
@@ -61,7 +64,10 @@ export default function RootLayout({ children }) {
           enableSystem
           disableTransitionOnChange={false}
         >
-          {children}
+          <div className="flex flex-col min-h-screen">
+            {children}
+            <Footer />
+          </div>
           <Toaster position="top-right" richColors />
           <AnalyticsWrapper />
         </ThemeProvider>

@@ -25,7 +25,9 @@ import {
   CheckCircle2,
   XCircle,
   Sparkles,
-  FileText
+  FileText,
+  Shield,
+  ExternalLink
 } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useState, useEffect } from 'react'
@@ -431,6 +433,100 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
         
+        {/* Authorized Domains */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-accent" />
+              Authorized Domains
+            </CardTitle>
+            <CardDescription>
+              Configure domains authorized for OAuth and API access. Used for Google Workspace integration.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="authorizedDomains">Authorized Domains</Label>
+              <div className="space-y-2">
+                {(() => {
+                  const saved = localStorage.getItem('authorized_domains')
+                  const domains = saved ? JSON.parse(saved) : ['@lauchpadphilly.org']
+                  return domains.map((domain, index) => (
+                    <div key={index} className="flex gap-2">
+                      <Input
+                        value={domain}
+                        onChange={(e) => {
+                          const newDomains = [...domains]
+                          newDomains[index] = e.target.value
+                          localStorage.setItem('authorized_domains', JSON.stringify(newDomains))
+                          toast.success('Domain updated')
+                        }}
+                        placeholder="e.g., @example.com"
+                        className="flex-1 font-mono text-sm"
+                      />
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => {
+                          const newDomains = domains.filter((_, i) => i !== index)
+                          localStorage.setItem('authorized_domains', JSON.stringify(newDomains))
+                          toast.success('Domain removed')
+                          setTimeout(() => window.location.reload(), 500)
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))
+                })()}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const saved = localStorage.getItem('authorized_domains')
+                    const domains = saved ? JSON.parse(saved) : ['@lauchpadphilly.org']
+                    const newDomain = prompt('Enter new authorized domain (e.g., @example.com):', '@')
+                    if (newDomain && newDomain.trim()) {
+                      const newDomains = [...domains, newDomain.trim()]
+                      localStorage.setItem('authorized_domains', JSON.stringify(newDomains))
+                      toast.success('Domain added')
+                      setTimeout(() => window.location.reload(), 500)
+                    }
+                  }}
+                  className="w-full"
+                >
+                  <Users className="h-4 w-4 mr-2" />
+                  Add Domain
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                These domains are used to filter student communications and validate OAuth requests. 
+                Format: @domain.com (include the @ symbol).
+              </p>
+              <div className="mt-2 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                <p className="text-xs text-blue-500 font-medium mb-1">OAuth Configuration:</p>
+                <p className="text-xs text-blue-500/90 mb-2">
+                  Make sure these domains are also added to your Google OAuth application's authorized domains in the{' '}
+                  <a 
+                    href="https://console.cloud.google.com/apis/credentials" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="underline"
+                  >
+                    Google Cloud Console
+                  </a>
+                  .
+                </p>
+                <p className="text-xs text-blue-500/90">
+                  <strong>Production URL:</strong> For your Vercel deployment, add{' '}
+                  <code className="bg-blue-500/20 px-1 rounded">taheera-time-data-tracker.vercel.app</code>{' '}
+                  to authorized domains in the OAuth consent screen.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
         {/* OpenAI API Key Settings */}
         <Card>
           <CardHeader>
@@ -605,7 +701,16 @@ export default function SettingsPage() {
                 className="font-mono text-sm"
               />
               <p className="text-xs text-muted-foreground">
-                Your OpenAI project ID. This allows you to use specific projects and track usage per project.
+                Your OpenAI project ID. This allows you to use specific projects and track usage per project. Find it in your{' '}
+                <a 
+                  href="https://platform.openai.com/projects" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-accent hover:underline"
+                >
+                  OpenAI projects dashboard
+                </a>
+                .
               </p>
             </div>
             <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
@@ -926,6 +1031,61 @@ export default function SettingsPage() {
                 toast.success('Form configuration updated!')
               }}
             />
+          </CardContent>
+        </Card>
+        
+        {/* Legal & Privacy */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-accent" />
+              Legal & Privacy
+            </CardTitle>
+            <CardDescription>
+              View our privacy policy and terms of service
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between p-4 rounded-lg border border-border/50 bg-card/50">
+              <div className="flex items-center gap-3">
+                <Shield className="h-5 w-5 text-accent" />
+                <div>
+                  <p className="font-medium text-card-foreground">Privacy Policy</p>
+                  <p className="text-sm text-muted-foreground">
+                    Learn how we handle your data and protect your privacy
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push('/privacy')}
+                className="gap-2"
+              >
+                View
+                <ExternalLink className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="flex items-center justify-between p-4 rounded-lg border border-border/50 bg-card/50">
+              <div className="flex items-center gap-3">
+                <FileText className="h-5 w-5 text-accent" />
+                <div>
+                  <p className="font-medium text-card-foreground">Terms of Service</p>
+                  <p className="text-sm text-muted-foreground">
+                    Read our terms and conditions of use
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push('/terms')}
+                className="gap-2"
+              >
+                View
+                <ExternalLink className="h-4 w-4" />
+              </Button>
+            </div>
           </CardContent>
         </Card>
         

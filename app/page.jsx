@@ -17,6 +17,7 @@ import { AIUsageTracker } from '@/components/ai-usage-tracker'
 import { StudentFeedbackManager } from '@/components/student-feedback-manager'
 import { StudentCalendarManager } from '@/components/student-calendar-manager'
 import { Sparkles, TrendingUp, Activity, Search, Filter, FileText, Calendar, Clock, Download, Settings } from 'lucide-react'
+import { Logo, LogoIcon } from '@/components/logo'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { useState, useRef, useEffect, useCallback } from 'react'
@@ -325,22 +326,8 @@ export default function Page() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between w-full">
           <div className="space-y-2 flex-1">
             <div className="flex items-center gap-4 flex-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => router.push('/settings')}
-                className="h-9 w-9 rounded-lg hover:bg-accent/10"
-                title="Settings"
-              >
-                <Settings className="h-5 w-5 text-muted-foreground hover:text-accent transition-colors" />
-              </Button>
-              <div className="rounded-xl bg-gradient-to-br from-accent/20 to-accent/10 p-2.5 shadow-lg">
-                <Sparkles className="h-6 w-6 text-accent" />
-              </div>
-              <div>
-                <h1 className="text-3xl sm:text-4xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
-                  Taheera's Workshop Tracker
-                </h1>
+              <Logo showText={true} size="default" className="flex-shrink-0" />
+              <div className="hidden sm:block">
                 <p className="mt-1 text-sm text-muted-foreground">
                   Monitor workshop creation, student communication, and AI usage
                 </p>
@@ -356,6 +343,15 @@ export default function Page() {
               <span className="text-sm font-medium text-card-foreground">Live</span>
             </div>
             <ThemeToggle />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => router.push('/settings')}
+              className="h-9 w-9 rounded-lg hover:bg-accent/10"
+              title="Settings"
+            >
+              <Settings className="h-5 w-5 text-muted-foreground hover:text-accent transition-colors" />
+            </Button>
           </div>
         </div>
 
