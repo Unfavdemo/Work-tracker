@@ -34,21 +34,21 @@ export default function TermsOfServicePage() {
               Terms and Conditions
             </CardTitle>
             <CardDescription>
-              Please read these terms carefully before using Taheera's Workshop Tracker.
+              Please read these terms carefully before using Workshop Tracker.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 prose prose-invert max-w-none">
             <section>
               <h2 className="text-xl font-semibold mb-3">1. Acceptance of Terms</h2>
               <p className="text-muted-foreground">
-                By accessing and using Taheera's Workshop Tracker, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.
+                By accessing and using Workshop Tracker, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.
               </p>
             </section>
 
             <section>
               <h2 className="text-xl font-semibold mb-3">2. Use License</h2>
               <p className="text-muted-foreground mb-4">
-                Permission is granted to temporarily use Taheera's Workshop Tracker for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:
+                Permission is granted to temporarily use Workshop Tracker for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:
               </p>
               <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
                 <li>Modify or copy the materials</li>
@@ -121,21 +121,21 @@ export default function TermsOfServicePage() {
             <section>
               <h2 className="text-xl font-semibold mb-3">7. Disclaimer</h2>
               <p className="text-muted-foreground">
-                The materials on Taheera's Workshop Tracker are provided on an 'as is' basis. We make no warranties, expressed or implied, and hereby disclaim and negate all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.
+                The materials on Workshop Tracker are provided on an 'as is' basis. We make no warranties, expressed or implied, and hereby disclaim and negate all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.
               </p>
             </section>
 
             <section>
               <h2 className="text-xl font-semibold mb-3">8. Limitations</h2>
               <p className="text-muted-foreground">
-                In no event shall Taheera's Workshop Tracker or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the materials on the application, even if we or an authorized representative has been notified orally or in writing of the possibility of such damage.
+                In no event shall Workshop Tracker or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the materials on the application, even if we or an authorized representative has been notified orally or in writing of the possibility of such damage.
               </p>
             </section>
 
             <section>
               <h2 className="text-xl font-semibold mb-3">9. Revisions and Errata</h2>
               <p className="text-muted-foreground">
-                The materials appearing on Taheera's Workshop Tracker could include technical, typographical, or photographic errors. We do not warrant that any of the materials are accurate, complete, or current. We may make changes to the materials at any time without notice.
+                The materials appearing on Workshop Tracker could include technical, typographical, or photographic errors. We do not warrant that any of the materials are accurate, complete, or current. We may make changes to the materials at any time without notice.
               </p>
             </section>
 
@@ -154,12 +154,12 @@ export default function TermsOfServicePage() {
               <p className="text-muted-foreground mt-2">
                 This application is hosted at:{' '}
                 <a 
-                  href="https://taheera-time-data-tracker.vercel.app" 
+                  href="https://your-app.vercel.app" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="text-accent hover:underline"
                 >
-                  https://taheera-time-data-tracker.vercel.app
+                  https://your-app.vercel.app
                 </a>
               </p>
             </section>

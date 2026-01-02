@@ -26,6 +26,6 @@
   
   <!-- Text part - dark for light theme -->
   <text x="56" y="38" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="700" fill="#1a1a1a">
-    Taheera's Workshop Tracker
+    Workshop Tracker
   </text>
 </svg>

@@ -48,7 +48,7 @@ export function Logo({ className = '', showText = true, size = 'default' }) {
     <div className={`flex items-center gap-3 ${className}`}>
       <img
         src={logoSrc}
-        alt="Taheera's Workshop Tracker"
+        alt="Workshop Tracker"
         width={dimensions.width}
         height={dimensions.height}
         className="object-contain"

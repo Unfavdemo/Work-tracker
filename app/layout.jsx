@@ -18,11 +18,10 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata = {
-  title: 'Taheera\'s Workshop Tracker | Dashboard',
+  title: 'Workshop Tracker | Dashboard',
   description: 'Monitor workshop creation, student communication, and AI usage with real-time insights and smart recommendations',
   generator: 'Next.js',
   keywords: ['workshop', 'tracker', 'dashboard', 'analytics', 'education'],
-  authors: [{ name: 'Taheera' }],
   icons: {
     icon: [
       {

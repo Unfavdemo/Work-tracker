@@ -26,6 +26,6 @@
   
   <!-- Text part -->
   <text x="56" y="38" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="700" fill="currentColor" class="text-foreground">
-    Taheera's Workshop Tracker
+    Workshop Tracker
   </text>
 </svg>

@@ -41,7 +41,7 @@ export default function PrivacyPolicyPage() {
             <section>
               <h2 className="text-xl font-semibold mb-3">1. Information We Collect</h2>
               <p className="text-muted-foreground mb-4">
-                Taheera's Workshop Tracker collects the following types of information:
+                Workshop Tracker collects the following types of information:
               </p>
               <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
                 <li>Workshop and event data that you create and manage</li>
@@ -134,12 +134,12 @@ export default function PrivacyPolicyPage() {
               <p className="text-muted-foreground mt-2">
                 This application is hosted at:{' '}
                 <a 
-                  href="https://taheera-time-data-tracker.vercel.app" 
+                  href="https://your-app.vercel.app" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="text-accent hover:underline"
                 >
-                  https://taheera-time-data-tracker.vercel.app
+                  https://your-app.vercel.app
                 </a>
               </p>
             </section>

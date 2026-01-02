@@ -519,7 +519,7 @@ export default function SettingsPage() {
                 </p>
                 <p className="text-xs text-blue-500/90">
                   <strong>Production URL:</strong> For your Vercel deployment, add{' '}
-                  <code className="bg-blue-500/20 px-1 rounded">taheera-time-data-tracker.vercel.app</code>{' '}
+                  <code className="bg-blue-500/20 px-1 rounded">your-app.vercel.app</code>{' '}
                   to authorized domains in the OAuth consent screen.
                 </p>
               </div>
